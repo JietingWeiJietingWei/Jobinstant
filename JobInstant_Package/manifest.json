@@ -1,0 +1,70 @@
+{
+  "manifest_version": 3,
+  "name": "JobInstant",
+  "version": "5.39.0",
+  "description": "Instantly score LinkedIn jobs against your resume using Claude AI.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "alarms",
+    "tabs",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "https://*.workers.dev/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.linkedin.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "options.html",
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "JobInstant"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "resume-rewrite.html",
+        "resume-rewrite.js"
+      ],
+      "matches": [
+        "https://www.linkedin.com/*"
+      ]
+    },
+    {
+      "resources": [
+        "onboarding.html",
+        "onboarding.js",
+        "lib/pdf.min.js",
+        "lib/pdf.worker.min.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}
