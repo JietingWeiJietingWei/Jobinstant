@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Jobinstant — Settings</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+    color: #0f172a;
+  }
+  .wrap { width: 100%; max-width: 520px; }
+  .header {
+    background: linear-gradient(135deg, #2D31FA, #2D31FA);
+    border-radius: 14px 14px 0 0;
+    padding: 20px 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .header h1 { color: white; font-size: 18px; font-weight: 700; }
+  .header p  { color: rgba(255,255,255,0.75); font-size: 12px; margin-top: 2px; }
+  .card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-top: none;
+    border-radius: 0 0 14px 14px;
+    overflow: hidden;
+  }
+  .field { padding: 20px 24px; border-bottom: 1px solid #e2e8f0; }
+  .label {
+    font-size: 13px; font-weight: 700; color: #0f172a;
+    margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+  .hint { font-size: 11px; color: #94a3b8; margin-top: 6px; line-height: 1.5; }
+
+  /* Upload zone */
+  .upload-zone {
+    border: 2px dashed #c7d7fd; border-radius: 10px;
+    padding: 20px; text-align: center; background: #eef0ff;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .upload-zone:hover { border-color: #2D31FA; background: #dde1ff; }
+  .upload-zone.has-file { border-color: #16a34a; background: #f0fdf4; border-style: solid; }
+  .upload-zone-title { font-size: 13px; font-weight: 700; color: #1a1dcc; margin-bottom: 4px; }
+  .upload-zone-sub   { font-size: 11px; color: #64748b; }
+  .upload-zone-types { font-size: 10px; color: #94a3b8; font-family: monospace;
+    background: rgba(255,255,255,0.7); border-radius: 4px; padding: 2px 8px;
+    display: inline-block; margin-top: 6px; }
+  #file-input { display: none; }
+
+  .file-result {
+    display: none; align-items: center; gap: 10px;
+    padding: 10px 14px; background: #f0fdf4;
+    border: 1px solid #bbf7d0; border-radius: 10px; margin-top: 10px;
+  }
+  .file-result-name { font-size: 12px; font-weight: 700; color: #166534; }
+  .file-result-meta { font-size: 10px; color: #4ade80; }
+  .file-result-clear {
+    margin-left: auto; background: none; border: none;
+    color: #94a3b8; cursor: pointer; font-size: 15px; padding: 2px 6px;
+  }
+  .file-result-clear:hover { color: #dc2626; }
+
+  .parsing-bar {
+    display: none; align-items: center; gap: 8px;
+    font-size: 11px; color: #64748b;
+    padding: 8px 12px; background: #f8fafc;
+    border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 10px;
+  }
+  .spin {
+    width: 14px; height: 14px;
+    border: 2px solid #dde1ff; border-top-color: #2D31FA;
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Resume preview textarea (read-only, small) */
+  .resume-preview {
+    width: 100%; height: 90px;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0; border-radius: 8px;
+    font-size: 11px; font-family: monospace; color: #64748b;
+    background: #f8fafc; resize: none; outline: none;
+    margin-top: 10px; line-height: 1.5;
+  }
+
+  .actions { padding: 20px 24px; }
+  #saveBtn {
+    width: 100%; padding: 14px;
+    background: #16a34a; color: white;
+    border: none; border-radius: 8px;
+    font-size: 16px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    transition: background 0.15s;
+  }
+  #saveBtn:hover { background: #15803d; }
+  #saveBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+  #msg {
+    display: none; margin-top: 12px; padding: 12px 16px;
+    background: #f0fdf4; border: 1.5px solid #86efac;
+    border-radius: 8px; font-size: 14px; color: #16a34a;
+    font-weight: 600; text-align: center;
+  }
+  #err {
+    display: none; margin-top: 12px; padding: 12px 16px;
+    background: #fef2f2; border: 1.5px solid #fca5a5;
+    border-radius: 8px; font-size: 13px; color: #dc2626; font-weight: 600;
+  }
+  .how {
+    margin-top: 16px; padding: 14px 16px;
+    background: #eef0ff; border: 1px solid #c7c9ff;
+    border-radius: 10px; font-size: 12px; color: #1a1dcc; line-height: 1.9;
+  }
+  .how strong { color: #1a1dcc; }
+
+  /* Server status pill */
+  .server-status {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; border-radius: 8px;
+    font-size: 12px; font-weight: 600;
+    background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534;
+    margin-bottom: 16px;
+  }
+  .server-status.error { background: #fef2f2; border-color: #fca5a5; color: #dc2626; }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #16a34a; flex-shrink: 0;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .status-dot.error { background: #dc2626; animation: none; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <span style="font-size:28px;">⚡</span>
+    <div>
+      <h1>Jobinstant — Settings</h1>
+      <p>Your resume is stored locally · AI runs on our server</p>
+    </div>
+  </div>
+  <div class="card">
+
+    <!-- Server status -->
+    <div class="field">
+      <div class="label">🌐 Server Status</div>
+      <div class="server-status" id="server-status">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Checking connection…</span>
+      </div>
+      <div class="hint">All analysis runs on our secure server. Your resume stays private.</div>
+    </div>
+
+    <!-- Resume upload -->
+    <div class="field">
+      <div class="label">📄 Your Resume</div>
+
+      <div class="upload-zone" id="upload-zone">
+        <div style="font-size:24px;margin-bottom:6px;">📂</div>
+        <div class="upload-zone-title">Click to upload your resume</div>
+        <div class="upload-zone-sub">or drag &amp; drop here</div>
+        <div class="upload-zone-types">PDF · DOCX · DOC · TXT</div>
+      </div>
+      <input type="file" id="file-input"
+        accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+
+      <div class="file-result" id="file-result">
+        <span style="font-size:20px;">✅</span>
+        <div>
+          <div class="file-result-name" id="file-name">—</div>
+          <div class="file-result-meta" id="file-meta">—</div>
+        </div>
+        <button class="file-result-clear" id="clear-btn">✕</button>
+      </div>
+
+      <div class="parsing-bar" id="parsing-bar">
+        <div class="spin"></div>
+        <span id="parsing-label">Reading file…</span>
+      </div>
+
+      <textarea class="resume-preview" id="resume-preview"
+        placeholder="Your resume text will appear here after upload…" readonly></textarea>
+      <div class="hint">Stored on your device only · never sent to any third party.</div>
+    </div>
+
+    <div class="actions">
+      <button id="saveBtn" disabled>✓ Save Resume</button>
+      <div id="msg">✓ Saved! Go to LinkedIn → Jobs and click ⚡ Score All.</div>
+      <div id="err"></div>
+      <div class="how">
+        <strong>After saving:</strong><br>
+        1. Go to linkedin.com/jobs<br>
+        2. Click any job listing<br>
+        3. Your match score appears automatically
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="options.js"></script>
+</body>
+</html>
