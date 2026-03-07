@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobInstant</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    background: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #ji-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+  }
+  #ji-result, #ji-loading, #ji-error, #ji-ratelimit, #ji-setup { flex-shrink: 0; }
+  #ji-body::-webkit-scrollbar { width: 3px; }
+  #ji-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  .ji-chip-m {
+    font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px;
+    background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; display: inline-block;
+  }
+  .ji-chip-g {
+    font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px;
+    background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; display: inline-block;
+  }
+  .ji-dim-section { margin: 0 14px 6px; border-radius: 10px; border: 1px solid #f0f0f0; overflow: hidden; }
+  .ji-dim-header {
+    width: 100%; padding: 10px 12px; border: none;
+    cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+    font-family: inherit;
+  }
+  .ji-dim-header:hover { filter: brightness(0.97); }
+  .ji-dim-body { padding: 2px 14px 6px; background: white; }
+  .ji-dim-arrow { font-size: 11px; color: #9ca3af; transition: transform 0.2s; }
+  .ji-icon-btn {
+    width: 28px; height: 28px; border-radius: 6px;
+    border: none; background: transparent; color: #9ca3af;
+    font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .ji-icon-btn:hover { background: #f3f4f6; color: #6b7280; }
+  .ji-spinner {
+    width: 32px; height: 32px; border: 3px solid #e0e7ff;
+    border-top-color: #2D31FA; border-radius: 50%;
+    animation: ji-spin 0.8s linear infinite;
+  }
+  @keyframes ji-spin { to { transform: rotate(360deg); } }
+  @keyframes ji-pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  #ji-setup { padding: 32px 20px; text-align: center; }
+  #ji-global-bar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; justify-content: flex-end; gap: 4px;
+    padding: 8px 10px 4px;
+    background: white;
+  }
+</style>
+</head>
+<body>
+<div id="ji-body">
+  <div id="ji-global-bar">
+    <button class="ji-icon-btn" id="ji-global-settings" title="Settings">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+    <button class="ji-icon-btn" id="ji-global-close" title="Close">✕</button>
+  </div>
+  <div id="ji-loading" style="display:none; padding:60px 20px; text-align:center; flex-direction:column; align-items:center; gap:16px;">
+    <div class="ji-spinner"></div>
+    <div style="font-size:13px; font-weight:700; color:#0f172a;">Checking how well you match…</div>
+    <div style="font-size:11px; color:#94a3b8; line-height:1.6;">
+      ✓ Reading job description<br>✓ Loading your resume<br>⏳ Matching your skills…
+    </div>
+  </div>
+  <div id="ji-result" style="display:none;"></div>
+  <div id="ji-error" style="display:none; padding:32px 16px; text-align:center;">
+    <div style="font-size:28px; margin-bottom:12px;">⚠️</div>
+    <div id="ji-error-msg" style="font-size:12px; color:#dc2626; font-weight:600; margin-bottom:8px;"></div>
+  </div>
+  <div id="ji-ratelimit" style="display:none; padding:32px 20px; text-align:center; flex-direction:column; align-items:center; gap:14px;">
+    <div id="ji-rl-icon" style="font-size:40px;">⏰</div>
+    <div id="ji-rl-title" style="font-size:15px; font-weight:800; color:#0f172a;"></div>
+    <div id="ji-rl-msg" style="font-size:12px; color:#64748b; line-height:1.6; max-width:260px;"></div>
+    <div id="ji-rl-badge" style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:10px 16px; font-size:11px; color:#16a34a; font-weight:600;"></div>
+  </div>
+  <div id="ji-setup" style="display:none;">
+    <div style="font-size:28px; margin-bottom:12px;">👋</div>
+    <div style="font-size:14px; font-weight:700; margin-bottom:8px;">Welcome to JobInstant</div>
+    <div style="font-size:12px; color:#64748b; margin-bottom:16px; line-height:1.6;">Upload your resume to see your best matches.</div>
+    <button id="ji-setup-btn" style="padding:10px 20px; background:linear-gradient(135deg,#1a1dcc,#2D31FA); color:white; border:none; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;">Open Settings</button>
+  </div>
+</div>
+<script src="sidepanel.js"></script>
+</body>
+</html>
