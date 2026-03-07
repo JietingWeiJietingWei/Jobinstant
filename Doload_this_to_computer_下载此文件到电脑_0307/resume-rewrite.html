@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume Tailored — JobInstant</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #F3F4F8;
+  --surface:     #FFFFFF;
+  --surface2:    #F8F9FB;
+  --border:      #E5E7EF;
+  --ink:         #0F1117;
+  --ink2:        #374151;
+  --muted:       #9CA3AF;
+  --accent:      #2D31FA;
+  --accent-h:    #2326d4;
+  --accent-soft: #EEEFFE;
+  --green:       #059669;
+  --green-soft:  #D1FAE5;
+  --amber:       #B45309;
+  --amber-soft:  #FEF3C7;
+  --radius:      14px;
+  --radius-sm:   8px;
+  --shadow:      0 1px 4px rgba(0,0,0,0.06), 0 2px 12px rgba(0,0,0,0.04);
+
+  /* Score stage — matches sidepanel.js exactly */
+  --s-red:       #dc2626;
+  --s-red-bg:    #fef2f2;
+  --s-yellow:    #d97706;
+  --s-yellow-bg: #fffbeb;
+  --s-green:     #16a34a;
+  --s-green-bg:  #f0fdf4;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ── Top Nav ── */
+.topnav {
+  background: var(--accent);
+  height: 52px;
+  display: flex; align-items: center;
+  padding: 0 24px;
+  position: sticky; top: 0; z-index: 200;
+  box-shadow: 0 2px 8px rgba(45,49,250,0.3);
+}
+.logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.logo-icon {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-text {
+  font-size: 15px; font-weight: 700; color: white; letter-spacing: -0.02em;
+}
+.nav-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+/* ── Buttons ── */
+.btn {
+  height: 36px; padding: 0 16px;
+  border-radius: var(--radius-sm);
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: all 0.15s; letter-spacing: -0.01em;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--ink2);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.btn-primary {
+  background: var(--accent); color: white;
+  box-shadow: 0 2px 8px rgba(45,49,250,0.28);
+}
+.btn-primary:hover { background: var(--accent-h); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,49,250,0.36); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ── Page ── */
+.page {
+  max-width: 980px; margin: 0 auto;
+  padding: 24px 20px 100px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+
+/* ── Loading / Error states ── */
+.state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; min-height: 400px; text-align: center;
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 48px 40px;
+  box-shadow: var(--shadow);
+}
+.state-icon { font-size: 44px; margin-bottom: 16px; }
+.state-title { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.state-sub { font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 300px; }
+.spinner {
+  width: 44px; height: 44px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 18px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.progress-wrap {
+  width: 260px; background: var(--border);
+  border-radius: 99px; height: 5px;
+  overflow: hidden; margin-top: 18px;
+}
+.progress-fill {
+  height: 100%; width: 0%;
+  background: var(--accent);
+  border-radius: 99px; transition: width 0.5s ease;
+}
+.progress-label { font-size: 11px; color: var(--muted); margin-top: 8px; }
+
+/* ── Result (hidden until JS shows it) ── */
+.result-wrap { display: none; flex-direction: column; gap: 18px; }
+
+/* ── Hero ── */
+.hero {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 26px 32px;
+  display: flex; align-items: center; gap: 28px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  position: relative; overflow: hidden;
+  animation: up 0.35s ease both;
+}
+.hero::after {
+  content: ''; position: absolute; right: -40px; top: -40px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, #FFFBEB 0%, transparent 65%);
+  pointer-events: none;
+}
+
+/* Gauge */
+.gauge-wrap { position: relative; width: 112px; height: 112px; flex-shrink: 0; }
+.gauge-svg  { width: 112px; height: 112px; transform: rotate(-90deg); }
+.gauge-track { fill: none; stroke: #EEF0F3; stroke-width: 9; }
+.gauge-fill {
+  fill: none; stroke-width: 9; stroke-linecap: round;
+  stroke-dasharray: 276;
+  stroke-dashoffset: 276; /* starts empty, JS animates */
+  transition: stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1),
+              stroke 0.3s ease;
+}
+/* Stage colors — threshold matches sidepanel.js: >=75 green, >=55 yellow, else red */
+.gauge-fill.stage-green { stroke: var(--s-green); }
+.gauge-fill.stage-yellow { stroke: var(--s-yellow); }
+.gauge-fill.stage-red { stroke: var(--s-red); }
+
+.gauge-center {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%); text-align: center;
+}
+.gauge-num {
+  font-size: 27px; font-weight: 800; line-height: 1;
+  letter-spacing: -0.03em;
+}
+.gauge-num.stage-green  { color: var(--s-green); }
+.gauge-num.stage-yellow { color: var(--s-yellow); }
+.gauge-num.stage-red    { color: var(--s-red); }
+.gauge-unit { font-size: 10px; color: var(--muted); font-weight: 400; margin-top: 3px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* Hero text */
+.hero-meta { flex: 1; min-width: 0; }
+.hero-sup {
+  font-size: 11px; font-weight: 400;
+  color: var(--muted); margin-bottom: 5px;
+}
+.hero-role {
+  font-size: 21px; font-weight: 700; color: var(--ink);
+  letter-spacing: -0.02em; line-height: 1.25;
+  margin-bottom: 12px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hero-pills { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.pill {
+  display: inline-flex; align-items: center;
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 500;
+}
+.pill-score-green  { background: var(--s-green-bg);  color: var(--s-green); }
+.pill-score-yellow { background: var(--s-yellow-bg); color: var(--s-yellow); }
+.pill-score-red    { background: var(--s-red-bg);    color: var(--s-red); }
+.pill-edits { background: #F5F3F0; color: #6B7280; font-weight: 400; }
+
+/* ── Two col ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1.65fr;
+  gap: 18px; align-items: start;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  animation: up 0.4s ease both;
+}
+.card:nth-child(1) { animation-delay: 0.05s; }
+.card:nth-child(2) { animation-delay: 0.1s; }
+@keyframes up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.card-head {
+  padding: 12px 18px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.c-icon {
+  width: 24px; height: 24px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0;
+}
+.c-icon-amber  { background: var(--amber-soft); }
+.c-icon-accent { background: var(--accent-soft); }
+.c-title {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink2);
+}
+.c-badge {
+  margin-left: auto;
+  background: #F5F3F0; color: #6B7280;
+  font-size: 10px; font-weight: 400; padding: 2px 8px; border-radius: 20px;
+}
+
+/* ── Changes list ── */
+.change-list { padding: 2px 0; }
+.change-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 18px; border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+}
+.change-item:last-child { border-bottom: none; }
+.change-item:hover { background: var(--surface2); }
+.c-num {
+  width: 19px; height: 19px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; flex-shrink: 0; margin-top: 2px;
+}
+.c-text { font-size: 12px; line-height: 1.6; color: var(--ink2); }
+.c-text strong { color: var(--ink); font-weight: 600; }
+.tag {
+  display: inline-block; font-size: 9px; font-weight: 700;
+  padding: 1px 6px; border-radius: 4px;
+  margin-left: 4px; vertical-align: middle;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+/* added = green, reordered = amber — consistent with resume highlights */
+.tag-added    { background: var(--green-soft); color: var(--green); }
+.tag-reordered { background: var(--amber-soft); color: var(--amber); }
+
+/* ── Resume body ── */
+.resume-body {
+  padding: 18px 20px 22px;
+  font-size: 12px; line-height: 1.85; color: var(--ink2);
+}
+.r-section { margin-bottom: 13px; }
+.r-section:last-child { margin-bottom: 0; }
+.r-label {
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 4px;
+  padding-bottom: 4px; border-bottom: 1px solid var(--border);
+}
+.r-line { min-height: 4px; }
+.r-name { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.r-contact { font-size: 11px; color: var(--muted); }
+.r-role { font-weight: 600; color: var(--ink); font-size: 12px; }
+.r-meta { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.r-company { font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.bul { display: flex; gap: 7px; margin-bottom: 5px; border-radius: 4px; }
+.bul.bul-reordered { background: #FEF08A; padding: 3px 6px; margin-left: -6px; }
+.bul.bul-added     { background: #d1fae5; padding: 3px 6px; margin-left: -6px; }
+.bul-dot { color: var(--muted); flex-shrink: 0; }
+
+/* Keyword highlights — added=green, reordered=amber */
+mark { border-radius: 3px; padding: 0 3px; font-weight: 600; }
+mark.added    { background: #D1FAE5; color: #065F46; }
+mark.reordered { background: #FEF08A; color: #713F12; }
+
+/* ── Bottom bar ── */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  height: 68px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+  z-index: 100;
+}
+.b-info { font-size: 12px; color: var(--muted); margin-right: 4px; }
+.b-info strong { color: var(--ink2); }
+.btn-bar-ghost {
+  height: 44px; padding: 0 22px;
+  border-radius: var(--radius-sm);
+  font-family: inherit; font-size: 15px; font-weight: 600;
+  cursor: pointer;
+  background: #f0f1ff;
+  border: 1.5px solid #c7caff; color: #2D31FA;
+  display: inline-flex; align-items: center; gap: 7px;
+  transition: all 0.15s;
+}
+.btn-bar-ghost:hover { border-color: var(--accent); color: white; background: var(--accent); }
+.btn-bar-primary {
+  height: 44px; padding: 0 22px;
+  border-radius: var(--radius-sm);
+  font-family: inherit; font-size: 15px; font-weight: 600;
+  cursor: pointer; border: none;
+  background: var(--accent); color: white;
+  display: inline-flex; align-items: center; gap: 7px;
+  box-shadow: 0 2px 8px rgba(45,49,250,0.28);
+  transition: all 0.15s;
+}
+.btn-bar-primary:hover { background: var(--accent-h); transform: translateY(-1px); }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: #1f2937; color: white;
+  padding: 9px 18px; border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  opacity: 0; transition: opacity 0.25s;
+  z-index: 999; pointer-events: none; white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="topnav">
+  <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg width="22" height="22" viewBox="0 0 128 128" fill="none">
+        <defs>
+          <clipPath id="ct"><polygon points="0,0 128,0 128,75.4 0,41.1"/></clipPath>
+          <clipPath id="cb"><polygon points="0,52.6 128,86.9 128,128 0,128"/></clipPath>
+        </defs>
+        <g clip-path="url(#ct)"><path d="M80 10L34 68L60 68L46 118L94 58L66 58Z" fill="#FFC828"/></g>
+        <g clip-path="url(#cb)"><path d="M80 10L34 68L60 68L46 118L94 58L66 58Z" fill="#CC8C0A"/></g>
+      </svg>
+    </div>
+    <span class="logo-text">JobInstant</span>
+  </a>
+  <div class="nav-actions">
+
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- ── Loading state ── -->
+  <div class="state" id="state-loading">
+    <div class="spinner"></div>
+    <div class="state-title">Rewriting your resume…</div>
+    <div class="state-sub">Tailoring every bullet point to this job description.</div>
+    <div class="progress-wrap">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-label" id="progress-label">Starting…</div>
+  </div>
+
+  <!-- ── Error state ── -->
+  <div class="state" id="state-error" style="display:none;">
+    <div class="state-icon">⚠️</div>
+    <div class="state-title" style="color:#dc2626;">Something went wrong</div>
+    <div class="state-sub" id="error-msg"></div>
+    <button class="btn btn-primary" id="retry-btn" style="margin-top:20px;">Try Again</button>
+  </div>
+
+  <!-- ── Result ── -->
+  <div class="result-wrap" id="result-wrap">
+
+    <!-- Hero -->
+    <div class="hero" id="hero-section">
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 112 112">
+          <circle class="gauge-track" cx="56" cy="56" r="44"/>
+          <circle class="gauge-fill" id="gauge-fill" cx="56" cy="56" r="44"/>
+        </svg>
+        <div class="gauge-center">
+          <div class="gauge-num" id="gauge-num">—</div>
+          <div class="gauge-unit">Score</div>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-sup">Rewritten for</div>
+        <div class="hero-role" id="hero-job-title">Loading…</div>
+        <div class="hero-pills">
+          <span class="pill" id="pill-score" style="display:none;"></span>
+          <span class="pill pill-edits" id="pill-changes" style="display:none;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two-column -->
+    <div class="two-col">
+
+      <!-- Left: Key Changes -->
+      <div class="card">
+        <div class="card-head">
+          <div class="c-icon c-icon-amber">🔧</div>
+          <span class="c-title">KEY CHANGES</span>
+          <span class="c-badge" id="changes-badge"></span>
+        </div>
+        <!-- JS renders change items here -->
+        <div class="change-list" id="changes-list"></div>
+      </div>
+
+      <!-- Right: Rewritten Resume -->
+      <div class="card">
+        <div class="card-head">
+          <div class="c-icon c-icon-accent">📄</div>
+          <span class="c-title">REWRITTEN RESUME</span>
+        </div>
+        <div class="resume-body" id="resume-output"></div>
+      </div>
+
+    </div>
+  </div><!-- /result-wrap -->
+
+</div><!-- /page -->
+
+<!-- Bottom bar (shown when result ready) -->
+<div class="bottom-bar" id="bottom-bar" style="display:none;">
+  <span class="b-info" id="bottom-info"></span>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <button class="btn-bar-ghost" id="rewrite-again-btn">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <path d="M11 6.5A4.5 4.5 0 1 1 6.5 2c1.26 0 2.4.5 3.24 1.32L12 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M9.5 1H12v2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Rewrite Again
+    </button>
+    <button class="btn-bar-primary" id="copy-btn-bottom">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <rect x="4" y="1" width="8" height="9" rx="1.5" stroke="white" stroke-width="1.4"/>
+        <rect x="1" y="3" width="8" height="9" rx="1.5" fill="white" fill-opacity=".2" stroke="white" stroke-width="1.4"/>
+      </svg>
+      Copy
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="resume-rewrite.js"></script>
+</body>
+</html>
