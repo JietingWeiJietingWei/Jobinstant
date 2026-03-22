@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>JobInstant</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body {
+  width:320px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:white; color:#0f172a; overflow:hidden;
+}
+
+/* Animated top stripe */
+.topbar { height:3px; background:linear-gradient(90deg,#2D31FA,#818cf8,#2D31FA); background-size:200% 100%; animation:shift 2.5s linear infinite; }
+@keyframes shift { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* Header */
+.brand { display:flex; align-items:center; gap:10px; padding:14px 16px 12px; border-bottom:1px solid #f1f5f9; }
+.logo { width:34px; height:34px; border-radius:8px; flex-shrink:0; background:linear-gradient(135deg,#1a1dcc,#2D31FA); border:1.5px solid rgba(255,255,255,0.25); display:flex; align-items:center; justify-content:center; box-shadow:0 3px 8px rgba(45,49,250,0.25); }
+.brand-name { font-size:14px; font-weight:800; color:#0f172a; }
+.brand-sub  { font-size:10px; color:#94a3b8; margin-top:1px; }
+
+/* Body */
+.body { padding:16px; }
+
+/* Upload zone */
+.upload-zone {
+  border:2px dashed #c7d2fe; border-radius:12px;
+  padding:28px 16px; text-align:center; background:#f8f9ff;
+  cursor:pointer; transition:all 0.2s;
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+}
+.upload-zone:hover, .upload-zone.drag { border-color:#2D31FA; background:#eef0ff; }
+.upload-icon { width:40px; height:40px; border-radius:10px; background:#eef0ff; display:flex; align-items:center; justify-content:center; }
+.upload-title { font-size:13px; font-weight:700; color:#0f172a; }
+.upload-sub   { font-size:11px; color:#94a3b8; }
+#file-input { display:none; }
+
+/* Saving state */
+.saving-bar { display:none; align-items:center; justify-content:center; gap:8px; padding:28px 16px; font-size:12px; color:#64748b; }
+.spin { width:16px; height:16px; border:2px solid #e2e8f0; border-top-color:#2D31FA; border-radius:50%; animation:spin 0.7s linear infinite; flex-shrink:0; }
+@keyframes spin { to{transform:rotate(360deg);} }
+
+/* Saved state */
+.saved-zone { border:1.5px solid #bbf7d0; border-radius:12px; padding:14px; background:#f0fdf4; display:flex; align-items:center; gap:10px; }
+.saved-icon { width:34px; height:34px; border-radius:50%; background:#dcfce7; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.saved-name { font-size:12px; font-weight:700; color:#15803d; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px; }
+.saved-label { font-size:10px; color:#4ade80; margin-top:1px; }
+.btn-replace { margin-left:auto; flex-shrink:0; background:white; border:1.5px solid #86efac; border-radius:7px; padding:5px 11px; font-size:11px; font-weight:600; color:#15803d; cursor:pointer; font-family:inherit; }
+.btn-replace:hover { background:#f0fdf4; }
+
+.btn-linkedin {
+  margin-top:12px; width:100%; padding:11px;
+  border-radius:10px; border:none;
+  background:linear-gradient(135deg,#1a1dcc,#2D31FA);
+  color:white; font-size:13px; font-weight:700;
+  cursor:pointer; font-family:inherit;
+  box-shadow:0 3px 10px rgba(45,49,250,0.3);
+  transition:all 0.18s;
+}
+.btn-linkedin:hover { transform:translateY(-1px); box-shadow:0 5px 16px rgba(45,49,250,0.4); }
+</style>
+</head>
+<body>
+
+<div class="topbar"></div>
+
+<div class="brand">
+  <div class="logo">
+    <svg width="20" height="20" viewBox="0 0 128 128" fill="none">
+      <defs>
+        <clipPath id="lp1"><polygon points="0,0 128,0 128,75.4 0,41.1"/></clipPath>
+        <clipPath id="lp2"><polygon points="0,52.6 128,86.9 128,128 0,128"/></clipPath>
+      </defs>
+      <g clip-path="url(#lp1)"><path d="M80 10L34 68L60 68L46 118L94 58L66 58Z" fill="#FFC828"/></g>
+      <g clip-path="url(#lp2)"><path d="M80 10L34 68L60 68L46 118L94 58L66 58Z" fill="#CC8C0A"/></g>
+    </svg>
+  </div>
+  <div>
+    <div class="brand-name">JobInstant</div>
+    <div class="brand-sub">Know Your Match. Boost It Instantly.</div>
+  </div>
+</div>
+
+<div class="body">
+  <input type="file" id="file-input" accept=".pdf,.doc,.docx,.odt,.txt,.rtf,.md">
+
+  <!-- Upload state -->
+  <div id="upload-state">
+    <div class="upload-zone" id="upload-zone">
+      <div class="upload-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 15V3M12 3L8 7M12 3L16 7" stroke="#2D31FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 15v4a2 2 0 002 2h14a2 2 0 002-2v-4" stroke="#2D31FA" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="upload-title">Upload your resume</div>
+      <div class="upload-sub">PDF · DOCX · TXT · RTF · ODT · MD · Auto-saved</div>
+    </div>
+  </div>
+
+  <!-- Saving state -->
+  <div class="saving-bar" id="saving-state">
+    <div class="spin"></div>
+    <span>Saving your resume...</span>
+  </div>
+
+  <!-- Saved state -->
+  <div id="saved-state" style="display:none;">
+    <div class="saved-zone">
+      <div class="saved-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M5 13l4 4L19 7" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div class="saved-name" id="saved-filename">Resume saved ✓</div>
+        <div class="saved-label">Ready to match jobs</div>
+      </div>
+      <button class="btn-replace" id="replace-btn">Replace</button>
+    </div>
+    <button class="btn-linkedin" id="linkedin-btn">Go to LinkedIn Jobs</button>
+  </div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>

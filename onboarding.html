@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JobInstant — Get Started</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f0f4f8;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+.card {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(45,49,250,0.08),
+    0 4px 6px rgba(0,0,0,0.04),
+    0 24px 60px rgba(0,0,0,0.10);
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(135deg, #1a1dcc 0%, #2D31FA 60%, #4f52ff 100%);
+  padding: 28px 32px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute; top: -40px; right: -40px;
+  width: 180px; height: 180px;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.header-logo {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px; position: relative; z-index: 1;
+}
+.logo-icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.logo-name { font-size: 15px; font-weight: 800; color: white; letter-spacing: -0.02em; }
+.header-headline {
+  font-size: 22px; font-weight: 800; color: white;
+  letter-spacing: -0.03em; line-height: 1.2;
+  margin-bottom: 6px; position: relative; z-index: 1;
+}
+.header-sub {
+  font-size: 13px; color: rgba(255,255,255,0.65);
+  line-height: 1.5; position: relative; z-index: 1;
+}
+.steps {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 18px; position: relative; z-index: 1;
+}
+.step-dot {
+  height: 8px; width: 8px; border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  transition: all 0.3s ease;
+}
+.step-dot.active { background: white; width: 22px; border-radius: 4px; }
+.step-dot.done   { background: rgba(255,255,255,0.55); width: 8px; border-radius: 50%; }
+
+/* ── Body ── */
+.body { padding: 28px 32px; }
+
+/* ── Upload zone ── */
+#upload-zone {
+  border: 2px dashed #c7d2fe;
+  border-radius: 14px;
+  background: #f5f6ff;
+  padding: 36px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+#upload-zone:hover, #upload-zone.drag {
+  border-color: #2D31FA;
+  background: #eef0ff;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(45,49,250,0.1);
+}
+#upload-zone.upload-error {
+  border-color: #dc2626;
+  background: #fef2f2;
+  animation: shake 0.35s ease;
+}
+#upload-zone.upload-success {
+  border-color: #16a34a;
+  background: #f0fdf4;
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-6px); }
+  40%      { transform: translateX(6px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(4px); }
+}
+.zone-icon {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, #eef0ff, #dde1ff);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  margin: 0 auto 14px;
+  box-shadow: 0 4px 12px rgba(45,49,250,0.12);
+  transition: transform 0.2s;
+}
+#upload-zone:hover .zone-icon { transform: scale(1.05); }
+.zone-title { font-size: 15px; font-weight: 700; color: #1a1dcc; margin-bottom: 4px; letter-spacing: -0.01em; }
+.zone-sub   { font-size: 12px; color: #6b7280; margin-bottom: 12px; }
+.zone-types { display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.type-pill {
+  font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500;
+  color: #4f46e5; background: rgba(79,70,229,0.08);
+  border: 1px solid rgba(79,70,229,0.15); border-radius: 5px; padding: 2px 7px;
+}
+#file-input { display: none; }
+
+/* ── Parsing state ── */
+#state-parsing {
+  display: none;
+  flex-direction: column; align-items: center;
+  gap: 14px; padding: 32px 24px; text-align: center;
+}
+.spinner-ring {
+  width: 48px; height: 48px;
+  border: 3px solid #e0e7ff;
+  border-top-color: #2D31FA;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.parsing-title { font-size: 15px; font-weight: 700; color: #0f172a; letter-spacing: -0.01em; }
+.parsing-steps { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 260px; }
+.parsing-step {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: #6b7280;
+  background: #f8fafc; border: 1px solid #f1f5f9;
+  border-radius: 8px; padding: 8px 12px;
+  transition: all 0.3s;
+}
+.parsing-step.done   { color: #16a34a; background: #f0fdf4; border-color: #dcfce7; }
+.parsing-step.active { color: #2D31FA; background: #eef0ff; border-color: #c7d2fe; }
+.step-icon { font-size: 13px; flex-shrink: 0; width: 16px; text-align: center; }
+
+/* ── Success badge ── */
+#success-badge {
+  display: none;
+  align-items: center; gap: 14px;
+  background: #f0fdf4; border: 1.5px solid #86efac;
+  border-radius: 14px; padding: 16px 18px;
+}
+.success-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 800; color: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(22,163,74,0.25);
+}
+#success-filename { font-size: 14px; font-weight: 700; color: #166534; letter-spacing: -0.01em; margin-bottom: 2px; }
+#success-meta     { font-size: 11px; color: #15803d; font-family: 'DM Mono', monospace; }
+
+/* ── Error bar ── */
+#error-bar {
+  display: none;
+  align-items: center; gap: 10px;
+  background: #fef2f2; border: 1.5px solid #fca5a5;
+  border-radius: 10px; padding: 12px 14px; margin-top: 12px;
+  font-size: 12px; font-weight: 600; color: #dc2626;
+}
+
+/* ── Divider ── */
+.divider { height: 1px; background: #f1f5f9; margin: 0 32px 24px; }
+
+/* ── Footer ── */
+.footer { padding: 0 32px 28px; display: flex; flex-direction: column; gap: 10px; }
+
+#btn-linkedin {
+  width: 100%; padding: 14px; border-radius: 12px; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; letter-spacing: -0.01em;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.2s;
+  background: linear-gradient(135deg, #1a1dcc, #2D31FA);
+  color: white; box-shadow: 0 4px 16px rgba(45,49,250,0.3);
+}
+#btn-linkedin:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(45,49,250,0.4);
+}
+#btn-linkedin:disabled {
+  background: #e2e8f0; color: #94a3b8;
+  box-shadow: none; cursor: not-allowed; transform: none;
+}
+
+#btn-replace {
+  display: none;
+  width: 100%; padding: 11px; border-radius: 10px;
+  border: 1.5px solid #e2e8f0; background: transparent;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+  color: #64748b; cursor: pointer;
+  align-items: center; justify-content: center; gap: 7px;
+  transition: all 0.15s;
+}
+#btn-replace:hover { background: #f8fafc; border-color: #cbd5e1; color: #374151; }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-logo">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-name">JobInstant</span>
+    </div>
+    <div id="header-headline" class="header-headline">Upload your resume to see your best matches.</div>
+    <div id="header-sub" class="header-sub">Upload your resume once to instantly see how well jobs match your background.</div>
+    <div class="steps">
+      <div id="step1" class="step-dot active"></div>
+      <div id="step2" class="step-dot"></div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+
+    <!-- State 1: Upload zone -->
+    <div id="state-upload">
+      <div id="upload-zone">
+        <div class="zone-icon">📄</div>
+        <div class="zone-title">Upload resume</div>
+        <div class="zone-sub">Drag &amp; drop here</div>
+        <div class="zone-types">
+          <span class="type-pill">PDF</span>
+          <span class="type-pill">DOCX</span>
+          <span class="type-pill">TXT</span>
+                  </div>
+      </div>
+      <input type="file" id="file-input"
+        accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+      <!-- Error detail (unsupported / parse failure) -->
+      <div id="error-detail" style="display:none; margin-top:12px; background:white; border:1.5px solid #fecaca; border-radius:10px; padding:14px 16px; text-align:left;">
+        <div style="display:flex;align-items:center;gap:10px;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid #fecaca;">
+          <div style="width:32px;height:32px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">⛔</div>
+          <div>
+            <div id="err-file-name" style="font-size:13px;font-weight:600;color:#dc2626;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;"></div>
+            <div id="err-file-type" style="font-size:11px;color:#9ca3af;margin-top:1px;"></div>
+          </div>
+        </div>
+        <div id="err-message" style="font-size:12px;color:#374151;line-height:1.7;margin-bottom:12px;"></div>
+        <div id="err-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;"></div>
+        <button id="err-retry-btn" style="width:100%;padding:10px;background:#2D31FA;color:white;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+          ↑ Upload a different file
+        </button>
+      </div>
+    </div>
+
+    <!-- State 2: Parsing -->
+    <div id="state-parsing">
+      <div class="spinner-ring"></div>
+      <div id="parsing-filename" class="parsing-title">Reading file…</div>
+      <div class="parsing-steps">
+        <div class="parsing-step" id="pstep-read">
+          <span class="step-icon" id="pstep-read-icon">○</span> Reading file
+        </div>
+        <div class="parsing-step" id="pstep-extract">
+          <span class="step-icon" id="pstep-extract-icon">○</span> Extracting text…
+        </div>
+        <div class="parsing-step" id="pstep-save">
+          <span class="step-icon" id="pstep-save-icon">○</span> Saving to extension
+        </div>
+      </div>
+    </div>
+
+    <!-- State 3: Success -->
+    <div id="success-badge">
+      <div class="success-icon">✓</div>
+      <div>
+        <div id="success-filename">—</div>
+        <div id="success-meta">—</div>
+      </div>
+    </div>
+
+  </div><!-- /body -->
+
+  <div class="divider"></div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <button id="btn-linkedin" disabled>Go to LinkedIn →</button>
+    <button id="btn-replace">↺ &nbsp;Replace Resume</button>
+  </div>
+
+</div><!-- /card -->
+
+<script src="lib/pdf.min.js"></script>
+<script src="onboarding.js"></script>
+</body>
+</html>
